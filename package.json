@@ -1,7 +1,7 @@
 {
-  "name": "react-native-camera",
+  "name": "checkinme-react-native-camera-custom",
   "description": "A Camera component for React Native. Also reads barcodes.",
-  "version": "4.2.1",
+  "version": "4.2.1-0",
   "author": "Lochlan Wansbrough <lochie@live.com> (http://lwansbrough.com)",
   "collective": {
     "type": "opencollective",
