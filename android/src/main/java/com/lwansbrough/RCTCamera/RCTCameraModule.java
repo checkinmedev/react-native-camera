@@ -380,116 +380,35 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
      * a guideline of steps and more information in general.
      */
     private void releaseMediaRecorder() {
-        // Must record at least a second or MediaRecorder throws exceptions on some platforms
-        long duration = System.currentTimeMillis() - MRStartTime;
-        if (duration < 1500) {
-            try {
-                Thread.sleep(1500 - duration);
-            } catch(InterruptedException ex) {
-                Log.e(TAG, "releaseMediaRecorder thread sleep error.", ex);
-            }
-        }
-
-        // Release actual MediaRecorder instance.
-        if (mMediaRecorder != null) {
-            // Stop recording video.
-            try {
-                mMediaRecorder.stop(); // stop the recording
-            } catch (RuntimeException ex) {
-                Log.e(TAG, "Media recorder stop error.", ex);
-            }
-
-            // Optionally, remove the configuration settings from the recorder.
-            mMediaRecorder.reset();
-
-            // Release the MediaRecorder.
-            mMediaRecorder.release();
-
-            // Reset variable.
-            mMediaRecorder = null;
-        }
-
-        // Lock the camera so that future MediaRecorder sessions can use it by calling
-        // Camera.lock(). Note this is not required on Android 4.0+ unless the
-        // MediaRecorder.prepare() call fails.
-        if (mCamera != null) {
-            mCamera.lock();
-        }
-
         if (mRecordingPromise == null) {
             return;
         }
 
-        File f = new File(mVideoFile.getPath());
-        if (!f.exists()) {
-            mRecordingPromise.reject(new RuntimeException("There is nothing recorded."));
-            mRecordingPromise = null;
-            return;
-        }
-
-        f.setReadable(true, false); // so mediaplayer can play it
-        f.setWritable(true, false); // so can clean it up
-
-        WritableMap response = new WritableNativeMap();
-        switch (mRecordingOptions.getInt("target")) {
-            case RCT_CAMERA_CAPTURE_TARGET_MEMORY:
-                byte[] encoded = convertFileToByteArray(mVideoFile);
-                response.putString("data", new String(encoded, Base64.NO_WRAP));
-                mRecordingPromise.resolve(response);
-                f.delete();
-                break;
-            case RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL:
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.Video.Media.DATA, mVideoFile.getPath());
-                values.put(MediaStore.Video.Media.TITLE, mRecordingOptions.hasKey("title") ? mRecordingOptions.getString("title") : "video");
-
-                if (mRecordingOptions.hasKey("description")) {
-                    values.put(MediaStore.Video.Media.DESCRIPTION, mRecordingOptions.hasKey("description"));
-                }
-
-                if (mRecordingOptions.hasKey("latitude")) {
-                    values.put(MediaStore.Video.Media.LATITUDE, mRecordingOptions.getString("latitude"));
-                }
-
-                if (mRecordingOptions.hasKey("longitude")) {
-                    values.put(MediaStore.Video.Media.LONGITUDE, mRecordingOptions.getString("longitude"));
-                }
-
-                values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
-                _reactContext.getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
-                addToMediaStore(mVideoFile.getAbsolutePath());
-                response.putString("path", Uri.fromFile(mVideoFile).toString());
-                mRecordingPromise.resolve(response);
-                break;
-            case RCT_CAMERA_CAPTURE_TARGET_TEMP:
-            case RCT_CAMERA_CAPTURE_TARGET_DISK:
-                response.putString("path", Uri.fromFile(mVideoFile).toString());
-                mRecordingPromise.resolve(response);
-        }
-
+        mRecordingPromise.reject(new RuntimeException("Record not support."));
         mRecordingPromise = null;
+        return;
     }
 
     public static byte[] convertFileToByteArray(File f)
     {
         byte[] byteArray = null;
-        try
-        {
-            InputStream inputStream = new FileInputStream(f);
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            byte[] b = new byte[1024*8];
-            int bytesRead;
+        // try
+        // {
+        //     InputStream inputStream = new FileInputStream(f);
+        //     ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        //     byte[] b = new byte[1024*8];
+        //     int bytesRead;
 
-            while ((bytesRead = inputStream.read(b)) != -1) {
-                bos.write(b, 0, bytesRead);
-            }
+        //     while ((bytesRead = inputStream.read(b)) != -1) {
+        //         bos.write(b, 0, bytesRead);
+        //     }
 
-            byteArray = bos.toByteArray();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        //     byteArray = bos.toByteArray();
+        // }
+        // catch (IOException e)
+        // {
+        //     e.printStackTrace();
+        // }
         return byteArray;
     }
 
